@@ -1,14 +1,16 @@
 const passport = require('passport');
 const router = require('express').Router();
-const CLIENT_URL = "http://localhost:3000/"
+const CLIENT_URL = "https://mimlyricstest2.onrender.com";
 
 router.get('/auth/google', passport.authenticate('google', {scope: ["profile"]}));
 
 router.get('/auth/login/failed', (req, res) => {
+    console.log("failed");
     res.status(401).json({success: false, message: "failure"});
 })
 
 router.get("/auth/login/success", (req, res) => {
+    console.log("success");
     if(req.user) {
         res.status(200).json({
             success: true,

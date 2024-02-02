@@ -2,7 +2,22 @@ const express = require('express');
 const app = express();
 const {createServer} = require('http');
 const {Server} = require("socket.io")
+
+// cookie parser/session
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+const cookieSession = require('cookie-session');
+app.use(cookieSession({
+    name: 'session',
+    keys: ['mimche'],
+    maxAge: 24 * 60 * 60 * 1000
+}));
+
+
 const passport = require('passport');
+app.use(passport.initialize());
+app.use(passport.session());
 // cors
 const credentials = require("./middlewares/credentials");
 app.use(credentials);
@@ -12,6 +27,9 @@ app.use(cors());
 require('dotenv').config();
 
 const httpServer = createServer(app);
+
+var allowedOrigins = ['https://mimlyricstest2.onrender.com','http://localhost:3000']
+
 const io = new Server(httpServer, {
   /*sid: "lv_VI97HAXpY6yYWAAAC",
   upgrades: ["websocket"],
@@ -22,29 +40,24 @@ const io = new Server(httpServer, {
   path: "/my-custom-path",*/
   cors: {
     //origin: "http://localhost:3000",
-    origin: "https://mimlyricstest.onrender.com",
+    origin: function(origin, callback) {
+        if(allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        }else {
+            callback(new Error('Not allowed by cors'));
+        }
+    },
     methods: ["GET, POST, PUT, DELETE"],
-    allowedHeaders: ["my-custom-header"],
     credentials: true,
   },
 });
 const port = process.env.PORT || 5175;
 const passportSetUp = require('./utils/passport-google');
 
-const cookieSession = require('cookie-session');
-app.use(cookieSession({
-    name: 'session',
-    keys: ['mimche'],
-    maxAge: 24 * 60 * 60 * 1000
-}));
-
 app.use("/public", express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(passport.initialize());
-app.use(passport.session());
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
+
 // db
 const connectDB = require('./config/db');
 connectDB();
@@ -102,21 +115,21 @@ io.on("connection", (socket) => {
         let {error,user } = addUser({id, phone, room, avatar, username});
         io.emit("getUser", {users, user});
         if(error) return callback(error);
-        socket.emit('message', {user: 'admin', text: `welcome ${phone} to the ${room}`});
-        socket.broadcast.to(room).emit('message', {user: 'admin', text: `${phone}, has joined` });
+        socket.emit('message', {user: 'admin', text: ` Welcome ${phone} !`});
+        socket.broadcast.to(room).emit('message', {user: 'admin', text: `${username}, has joined` });
         socket.join(room);
         callback();
     })
     //console.log(user.id);
     socket.on("sendMessage", ({from, to, text, avatar, username}, callback) => {   
         user = getUser(user.id); 
-        console.log(user);
+        //console.log(user);
         io.to(user.room).emit('message', { user: from, text: text, avatar: avatar, username: username });
         callback();
     });
     socket.on("disconnect", () => {
         removeUser(socket.id);
-        console.log("User had left");
+        //console.log("User had left");
         io.emit("getUsers", users);
     });
 });

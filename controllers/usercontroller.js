@@ -4,6 +4,7 @@ const User = require("../models/User");
 const {generateToken, generateAccessToken} = require("../utils/generate-token");
 const fs = require("fs");
 const jwt = require('jsonwebtoken');
+
 const register =  asyncHandler (async (req, res) => {
     var {firstName, lastName, email, phone, password, role} = req.body;    
     const userExists = await User.findOne({email});
@@ -19,8 +20,8 @@ const register =  asyncHandler (async (req, res) => {
         user.refreshToken = refreshToken;
         const accessToken = generateAccessToken(res, user._id, user.role);
         await user.save();
-        console.log(generateToken);
-        console.log(user);
+        //console.log(generateToken);
+        //console.log(user);
         res.status(201).json({_id: user._id, 
             firstName: user.firstName, 
             lastName: user.lastName, 
@@ -43,8 +44,8 @@ const auth = asyncHandler ( async (req, res) => {
         user.refreshToken = refreshToken;
         const accessToken = generateAccessToken(res, user._id, user.role);
         await user.save();
-        console.log(generateToken);
-        console.log(user);
+        //console.log(generateToken);
+        //console.log(user);
         res.status(201).json({
             _id: user._id,
             firstName: user.firstName,
@@ -62,8 +63,8 @@ const auth = asyncHandler ( async (req, res) => {
 
 const logout = asyncHandler(async (req, res) => {
     const cookies = req.cookies;
-    console.log("heyy");
-    console.log('To be emptied ', cookies);
+    //console.log("heyy");
+    //console.log('To be emptied ', cookies);
     if(!cookies.jwt) return res.status(204).message({message:'no jwt cookie'});
     const refreshToken = cookies.jwt;
     // is refreshToken in DB
@@ -220,8 +221,8 @@ const postAvatar = asyncHandler (async (req, res) => {
         const splitAvatar = user.avatar.split(":5000");
         const deleteAvatar = "." + splitAvatar[1];
         fs.unlink(deleteAvatar, (err) => {
-            if (err) return
-            console.log("deleted avatar");
+            if (err) return res.status(400).json({message: "Bad request. Avatar has not been deleted"})
+            console.log("deleted avatar successfully");
         })
         user.avatar = avatar || user.avatar;
     }
@@ -235,7 +236,7 @@ const deleteAvatar = asyncHandler(async (req, res) => {
     const {userId} = req.body;
     const user = await User.findById({_id:userId});
     if(user.avatar) {
-        user.avatar = null || user.avatar;
+        user.avatar = "" || user.avatar;
         const avatarSplit = user.avatar.split(":5000");
         const deleteAvatar = "." + avatarSplit[1];   
         fs.unlink(deleteAvatar, (err) => {

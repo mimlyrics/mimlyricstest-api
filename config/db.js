@@ -1,23 +1,31 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(process.env.MONGO_URI, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-
+/*const { MongoClient } = require("mongodb");
+// Replace the uri string with your connection string.
+const Room = require("../models/Room")
+const client = new MongoClient(process.env.MONGO_URI);
 const connectDB = async () => {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    const database =  client.db('mimlyrics');
+    const rooms = database.collection('rooms');
+    const users = database.collection('users')
+    const room = await rooms.findOne({name: 'mimlyrics francais'});
+    console.log(room);
+    console.log("Connected to database successfully ");
   } finally {
     // Ensures that the client will close when you finish/error
     await client.close();
   }
+}*/
+
+const mongoose = require('mongoose');
+
+const connectDB = async () => {
+    try {
+        const conn = await mongoose.connect(process.env.MONGO_URI);
+        console.log(`Db connection successful to - ${conn.connection.host}`);
+        return conn;
+    }catch(error) {
+        console.error(`connection failed`);
+    }
 }
-module.exports = connectDB
+
+module.exports = connectDB;

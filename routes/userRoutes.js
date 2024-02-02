@@ -45,7 +45,7 @@ router.post("/jwt/register", register);
 router.post("/jwt/auth", auth);
 router.post("/jwt/logout", logout);
 router.route("/admin/jwt/profile/:userId").get(getUser);
-router.route("/jwt/profile").get(protectAdmin, getUsersProfile).put(protect, updateUserProfile);
+router.route("/jwt/profile").get( getUsersProfile).put(protect, updateUserProfile);
 //router.route("/jwt/profile").get(protect, getUserProfile);
 router.route("/upload/avatar/:userId").put(upload.single("avatar"), postAvatar).get(getAvatar).delete(deleteAvatar);
 router.route("/jwt/delete/:userId").delete(deleteUser);
