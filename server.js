@@ -14,7 +14,6 @@ app.use(cookieSession({
     maxAge: 24 * 60 * 60 * 1000
 }));
 
-
 const passport = require('passport');
 app.use(passport.initialize());
 app.use(passport.session());
@@ -22,13 +21,21 @@ app.use(passport.session());
 const credentials = require("./middlewares/credentials");
 app.use(credentials);
 const cors = require('cors');
-app.use(cors());
+
+let corsOptions = {
+    origin: 'http://localhost:3000',    
+    credentials: 'true',
+    method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']   
+}
+app.use(cors(corsOptions));
 // dotenv
 require('dotenv').config();
 
 const httpServer = createServer(app);
 
-var allowedOrigins = ['https://mimlyricstest2.onrender.com','http://localhost:3000']
+
+var allowedOrigins = [ 'https://mimlyricstest.onrender.com',
+  'https://mimlyricstest2.onrender.com','http://localhost:3000']
 
 const io = new Server(httpServer, {
   /*sid: "lv_VI97HAXpY6yYWAAAC",
